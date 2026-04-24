@@ -1,0 +1,47 @@
+# Copyright (c) 2026 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Nordic TrustZone Secure Data Partition.
+
+  Marks a flash/RRAM partition as assigned to the ARM TrustZone Secure state
+  and carrying *data* (not executable code) on Nordic TrustZone-capable SoCs
+  (nRF91, nRF53, nRF54L, ...). Typical consumers are the TF-M Protected
+  Storage (PS), Internal Trusted Storage (ITS) and OTP / NV-counter areas.
+
+  This binding is a peer of "nordic,tz-secure-code-partition", not an umbrella
+  over it. Code slots use the code-partition compatible exclusively; data
+  regions use this one. The TF-M build aggregates both compatibles to compute
+  the full secure flash footprint (FLASH_SECURE_TOTAL_SIZE); doing the split
+  at the binding level lets FLASH_S_PARTITION_SIZE remain a per-slot value
+  without needing extra tagging on each node.
+
+  The tag is additive: the node is still a child of a "fixed-partitions"
+  table and continues to be validated by the fixed-partitions child-binding.
+
+  Example:
+
+      &cpuapp_rram {
+          partitions {
+              compatible = "fixed-partitions";
+              #address-cells = <1>;
+              #size-cells = <1>;
+
+              tfm_ps_partition: partition@80000 {
+                  compatible = "nordic,tz-secure-data-partition";
+                  label = "tfm-ps";
+                  reg = <0x00080000 DT_SIZE_K(16)>;
+              };
+          };
+      };
+
+compatible: "nordic,tz-secure-data-partition"
+
+include: [base.yaml]
+
+properties:
+  reg:
+    required: true
+  label:
+    type: string
+    required: false
